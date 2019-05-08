@@ -3,9 +3,10 @@
 
 系统依赖库：[duanhongyi](https://github.com/duanhongyi)/[**gmssl**](https://github.com/duanhongyi/gmssl)
 
+
 **系统架构图：**
 
-![pic](C:\Users\Chill\Documents\Code\Git\Kerberos\pic\pic.png)
+![pic](https://github.com/eW1z4rd/Kerberos/pic.png)
 
 **其中：**
 
