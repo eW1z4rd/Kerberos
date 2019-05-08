@@ -6,7 +6,7 @@
 
 **系统架构图：**
 
-![pic](https://github.com/eW1z4rd/Kerberos/pic.png)
+![pic](https://github.com/eW1z4rd/Kerberos/tree/master/pic/pic.png)
 
 **其中：**
 
