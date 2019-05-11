@@ -13,7 +13,7 @@
 
 2. Challenge = challenge_msg
 
-3. Response = { response_msg }hash
+3. Response = { response_msg } hash
 
 4. TGT = { UserA, Kclt-kdc } Kkdc
 
@@ -25,7 +25,12 @@
 
    TGS_REP = { Kclt-srv } Kclt-kdc, Ticket
 
-7. CS_REQ = { UserA, timestamp } Kclt-srv, Ticket
+7. CS_REQ = { UserA, timestamp, nonce } Kclt-srv, Ticket, pub_key_a
 
-8. CS_REP = { timestamp } Kclt-srv
+8. CS_REP = { timestamp, nonce } Kclt-srv, pub_key_b
 
+**可执行文件运行顺序：**
+
+1. KDC.py
+2. ServerB.py
+3. ClientA.py
