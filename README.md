@@ -30,7 +30,10 @@
 8. CS_REP = { timestamp, nonce } Kclt-srv, pub_key_b
 
 **可执行文件运行顺序：**
-
+- 身份认证
 1. KDC.py
 2. ServerB.py
 3. ClientA.py
+- 用户注册
+1. RegServer.py
+2. RegClient.py
