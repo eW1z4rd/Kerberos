@@ -5,9 +5,9 @@ import pymysql
 class KDCdb(object):
     def __init__(self):
         self.host = '127.0.0.1'
-        self.user = 'root'
-        self.password = 'mysql2018'
-        self.database = 'kdcdb'
+        self.user = 'username'
+        self.password = 'yourpwd'
+        self.database = 'dbname'
         self.charset = 'utf8'
 
     def connect_kdc_db(self):
