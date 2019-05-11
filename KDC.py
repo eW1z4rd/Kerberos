@@ -1,5 +1,3 @@
-import sys
-
 from Database.OptDatabase import KDCdb
 from SM_algorithm.gmssl import sm3, sm4
 from func import *
@@ -72,7 +70,8 @@ class KDC(Socket):
         self.A_pwd = self.Kdb.query_data(self.UserA.decode(), "kdc_tb")[0].encode()
         self.Kclt = self.set_kclt()
 
-        timestamp = self.kclt_decrypt(enc_timestamp, iv)  # 完成时间比对
+        timestamp = self.kclt_decrypt(enc_timestamp, iv)
+        tsp_compare(timestamp)
 
     def query_last_login(self):
         """ 请求上次访问时间 """
@@ -87,7 +86,9 @@ class KDC(Socket):
             while True:
                 month = choice([str(x) for x in range(1, 13)])
                 day = choice([str(x) for x in range(1, 31)])
-                if month != '2' or (day != '29' and day != '30'):
+                if (month != '2' or (day != '29' and day != '30')) \
+                        and int(month) <= int(self.format_last[5:7]) \
+                        and int(day) < int(self.format_last[-2:]):
                     break
 
             fake_data = self.format_last[:4] + "-" + month.zfill(2) + "-" + day.zfill(2)
@@ -103,7 +104,8 @@ class KDC(Socket):
             loc_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             self.Kdb.insert_data(self.UserA.decode(), loc_time, "kdc_login")
         else:
-            sys.exit(0)
+            print(R + "[-] KDC_ERR_LOGIN_INVALID" + w)
+            os._exit(0)
 
     def kkdc_encrypt(self):
         """ TGT = { UserA, Kclt-kdc } Kkdc """
@@ -165,7 +167,10 @@ class KDC(Socket):
 
         TGT, enc_data, ResourceB = self.format_TGS_REQ(tgs_req)
         Kclt_kdc, UserA_1 = self.kkdc_decrypt(TGT)
-        UserA_2, timestamp = self.kclt_kdc_decrypt(Kclt_kdc, enc_data)  # 完成时间比对
+        UserA_2, timestamp = self.kclt_kdc_decrypt(Kclt_kdc, enc_data)
+
+        tsp_compare(timestamp)
+        user_compare(UserA_1, UserA_2)
 
         self.B_pwd = self.Kdb.query_data(ResourceB.decode(), "kdc_tb")[0].encode()
 
@@ -223,6 +228,5 @@ class KDC(Socket):
 
 
 if __name__ == '__main__':
-
     k = KDC()
     k.main()

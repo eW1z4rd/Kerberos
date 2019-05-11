@@ -25,6 +25,8 @@ class ClientA(Socket):
 
         self.pri_key = None
 
+        self.nonces = []
+
     def set_kclt(self):
         return sm3.hash(self.A_pwd)
 
@@ -65,7 +67,9 @@ class ClientA(Socket):
         """ 保存 TGT ，解密 enc_data，对比 timestamp """
 
         TGT, enc_data, iv = self.format_AS_REP(as_rep)
-        self.Kclt_kdc, timestamp = self.kclt_decrypt(enc_data, iv)  # 完成时间比对
+        self.Kclt_kdc, timestamp = self.kclt_decrypt(enc_data, iv)
+
+        tsp_compare(timestamp)
 
         return TGT
 
@@ -112,14 +116,16 @@ class ClientA(Socket):
         return kp._kg(int(self.pri_key, 16), pub)
 
     def set_CS_REQ(self, tgs_rep):
-        """ CS_REQ = { UserA, timestamp } Kclt-srv, Ticket, pub_key_a """
+        """ CS_REQ = { UserA, timestamp, nonce } Kclt-srv, Ticket, pub_key_a """
 
         timestamp = set_timestamp()
+        nonce = get_random_str(8)
 
         self.Kclt_srv, Ticket = self.resolve_TGS_REP(tgs_rep)
 
         self.crypt_sm4_kclt_kdc.set_key(self.Kclt_srv, sm4.SM4_ENCRYPT)
-        enc_data = self.crypt_sm4_kclt_kdc.crypt_ecb(self.UserA + SIGN + timestamp)
+        enc_data = self.crypt_sm4_kclt_kdc.crypt_ecb(self.UserA + SIGN +
+                                                     timestamp + SIGN + nonce)
 
         self.pri_key, pub_key_a = self.cl_pkc_init()
 
@@ -129,7 +135,7 @@ class ClientA(Socket):
         return CS_REQ
 
     def resolve_CS_REP(self, cs_rep):
-        """ 使用 Kclt-srv 解密 { timestamp }，保存 Ticket，完成密钥协商 """
+        """ 使用 Kclt-srv 解密 { timestamp, nonce }，保存 Ticket，完成密钥协商 """
 
         enc_data, pub_key_b = cs_rep.split(SIGN)
 
@@ -137,7 +143,12 @@ class ClientA(Socket):
         self.Kclt_srv += ng_key[:16].encode()
 
         self.crypt_sm4_kclt_srv.set_key(self.Kclt_srv, sm4.SM4_DECRYPT)
-        timestamp = self.crypt_sm4_kclt_srv.crypt_ecb(enc_data)
+        dec_data = self.crypt_sm4_kclt_srv.crypt_ecb(enc_data)
+
+        timestamp, nonce = dec_data.split(SIGN)
+
+        tsp_compare(timestamp)
+        nonce_compare(nonce, self.nonces)
 
     def client_KDC(self):
         self.target_host = '127.0.0.1'
@@ -186,11 +197,11 @@ class ClientA(Socket):
 
 
 if __name__ == '__main__':
-    a = ClientA("KerberosUser", "这是A的密码111", "KerberosResource")
+    # a = ClientA("KerberosUser", "这是A的密码111", "KerberosResource")
 
-    # user = input("username: ")
-    # pw = input("password: ")
-    # res = input("The resource you want to access: ")
+    user = input("username: ")
+    pw = input("password: ")
+    res = input("The resource you want to access: ")
 
-    # a = ClientA(user, pw, res)
+    a = ClientA(user, pw, res)
     a.main()

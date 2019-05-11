@@ -1,3 +1,4 @@
+import os
 import string
 import time
 from random import choice
@@ -6,21 +7,38 @@ from PBKDF2.pbkdf2 import re_gen_key
 
 SIGN = b'adm10'
 
+R = '\033[1;31m'
+w = '\033[0m'
+
 
 def set_timestamp():
     return str(time.time()).encode()
 
 
-def tsp_compare(time_begin, time_end):
+def tsp_compare(time_begin):
+    time_end = set_timestamp()
     sub = float(time_end) - float(time_begin)  # 60s
     if sub <= 60:
         pass
     else:
-        print("[-] KDC_ERR_NEVER_VALID")
+        print(R + "[-] KDC_ERR_TIME_INVALID" + w)
+        os._exit(0)
 
 
-def nonce_compare(nonce):
-    pass
+def nonce_compare(nonce, nonces):
+    if nonce in nonces:
+        print(R + "[-] KDC_ERR_NONCE_INVALID" + w)
+        os._exit(0)
+    else:
+        nonces.append(nonce)
+
+
+def user_compare(u1, u2):
+    if u1 == u2:
+        pass
+    else:
+        print(R + "[-] KDC_ERR_USER_INVALID" + w)
+        os._exit(0)
 
 
 def get_random_str(strlen=16):
@@ -45,7 +63,7 @@ def r_file(f_name):
         with open(f_name, 'r') as f:
             return f.read()
     except FileNotFoundError:
-        print("[-] No such file or directory")
+        print(R + "[-] No such file or directory" + w)
 
 
 def w_file(f_name, s):
