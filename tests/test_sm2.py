@@ -1,4 +1,4 @@
-from SM_algorithm.gmssl import sm2, func
+from lib.gmssl import sm2, func
 
 kp = sm2.CryptSM2(public_key='', private_key='')
 
@@ -11,7 +11,6 @@ print("public_key:%s" % public_key)
 
 
 if __name__ == '__main__':
-
     sm2_crypt = sm2.CryptSM2(public_key=public_key, private_key=private_key)
     data = "Python测试".encode()
 

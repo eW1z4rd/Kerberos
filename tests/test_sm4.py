@@ -1,8 +1,6 @@
-from SM_algorithm.gmssl import sm4
-
+from lib.gmssl import sm4
 
 if __name__ == '__main__':
-
     value = 'Python测试Python测试Python测试'.encode()
     crypt_sm4 = sm4.CryptSM4()
     key = crypt_sm4.get_random_key()

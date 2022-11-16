@@ -1,9 +1,9 @@
 import socket
 
-from SM_algorithm.gmssl import sm2, sm3, sm4
-from func import *
-
-from KerberosSocket import Socket
+from conf.config import SIGN
+from lib.common import get_random_iv, set_timestamp, get_random_str, tsp_compare, nonce_compare
+from lib.gmssl import sm2, sm3, sm4
+from lib.ksocket import Socket
 
 
 class ClientA(Socket):
@@ -152,7 +152,7 @@ class ClientA(Socket):
 
     def client_KDC(self):
         self.target_host = '127.0.0.1'
-        self.target_port = 8000
+        self.target_port = 9000
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((self.target_host, self.target_port))
@@ -161,8 +161,8 @@ class ClientA(Socket):
         client.send(AS_REQ)
 
         query = client.recv(1024).decode()
-        print("Candidate list:", query)
-        data = input("Please select your last login time (yyyy-mm-dd): ").encode()
+        print('Candidate list:', query)
+        data = input('Please select your last login time (yyyy-mm-dd): ').encode()
         client.send(sm3.hash(data))
 
         AS_REP = client.recv(1024)
@@ -178,7 +178,7 @@ class ClientA(Socket):
 
     def client_ServerB(self, tgs_rep):
         self.target_host = '127.0.0.1'
-        self.target_port = 8001
+        self.target_port = 9001
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((self.target_host, self.target_port))
@@ -197,11 +197,4 @@ class ClientA(Socket):
 
 
 if __name__ == '__main__':
-    # a = ClientA("KerberosUser", "这是A的密码111", "KerberosResource")
-
-    user = input("username: ")
-    pw = input("password: ")
-    res = input("The resource you want to access: ")
-
-    a = ClientA(user, pw, res)
-    a.main()
+    ClientA('KerberosUser', '这是A的密码111', 'KerberosResource').main()

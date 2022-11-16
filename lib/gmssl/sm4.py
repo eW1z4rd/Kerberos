@@ -2,9 +2,8 @@ import copy
 import string
 from random import choice
 
-from PBKDF2.pbkdf2 import re_gen_key
-from .func import xor, rotl, get_uint32_be, put_uint32_be, \
-    bytes_to_list, list_to_bytes, padding, unpadding
+from lib.gmssl.func import put_uint32_be, get_uint32_be, rotl, bytes_to_list, xor, padding, list_to_bytes, unpadding
+from lib.pbkdf2 import re_gen_key
 
 # Expanded SM4 box table
 SM4_BOXES_TABLE = [

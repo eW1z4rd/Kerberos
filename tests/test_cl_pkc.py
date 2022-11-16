@@ -1,4 +1,4 @@
-from SM_algorithm.gmssl import sm2
+from lib.gmssl import sm2
 
 kp = sm2.CryptSM2(public_key='', private_key='')
 

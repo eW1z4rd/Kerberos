@@ -1,7 +1,8 @@
 from random import choice
 
-from PBKDF2.pbkdf2 import re_gen_key
-from . import sm3, func
+from lib.gmssl import sm3
+from lib.gmssl.func import random_hex
+from lib.pbkdf2 import re_gen_key
 
 # 选择素域，设置椭圆曲线参数
 
@@ -207,7 +208,7 @@ class CryptSM2(object):
     def encrypt(self, data):
         # 加密函数，data消息(bytes)
         msg = data.hex()  # 消息转化为16进制字符串
-        k = func.random_hex(self.para_len)
+        k = random_hex(self.para_len)
         C1 = self._kg(int(k, 16), self.ecc_table['g'])
         xy = self._kg(int(k, 16), self.public_key)
         x2 = xy[0:self.para_len]

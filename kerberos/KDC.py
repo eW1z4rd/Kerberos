@@ -1,18 +1,20 @@
-from Database.OptDatabase import KDCdb
-from SM_algorithm.gmssl import sm3, sm4
-from func import *
-
+import os
+import time
 from random import choice, shuffle
 
-from KerberosSocket import Socket
+from conf.config import SIGN, MAIN_PWD
+from lib.common import get_random_str, tsp_compare, R, w, get_random_iv, set_timestamp, user_compare
+from lib.db import KDCdb
+from lib.gmssl import sm3, sm4
+from lib.ksocket import Socket
 
 
 class KDC(Socket):
-    def __init__(self):
+    def __init__(self, pwd):
         super().__init__()
 
-        self.bind_ip = "0.0.0.0"
-        self.bind_port = 8000
+        self.bind_ip = '0.0.0.0'
+        self.bind_port = 9000
 
         self.UserA = None
         self.A_pwd = None
@@ -21,7 +23,7 @@ class KDC(Socket):
         self.Kclt = None
         self.crypt_sm4_kclt = sm4.CryptSM4()
 
-        self.KDC_pwd = "kad8cm1p0ins0s3w1o9r2d".encode()
+        self.KDC_pwd = pwd
         self.Kkdc = self.set_kkdc()
         self.crypt_sm4_kkdc = sm4.CryptSM4()
 
@@ -67,7 +69,7 @@ class KDC(Socket):
 
         enc_timestamp, self.UserA, iv = self.format_AS_REQ(as_req)
 
-        self.A_pwd = self.Kdb.query_data(self.UserA.decode(), "kdc_tb")[0].encode()
+        self.A_pwd = self.Kdb.query_data(self.UserA.decode(), 'kdc_user')[0].encode()
         self.Kclt = self.set_kclt()
 
         timestamp = self.kclt_decrypt(enc_timestamp, iv)
@@ -76,7 +78,7 @@ class KDC(Socket):
     def query_last_login(self):
         """ 请求上次访问时间 """
 
-        last_login = self.Kdb.query_data(self.UserA.decode(), "kdc_login")
+        last_login = self.Kdb.query_data(self.UserA.decode(), 'kdc_login')
         self.format_last = last_login[0][:10]
 
         fake_list = [self.format_last]
@@ -91,7 +93,7 @@ class KDC(Socket):
                         and int(day) < int(self.format_last[-2:]):
                     break
 
-            fake_data = self.format_last[:4] + "-" + month.zfill(2) + "-" + day.zfill(2)
+            fake_data = f'{self.format_last[:4]}-{month.zfill(2)}-{day.zfill(2)}'
             fake_list.append(fake_data)
 
         shuffle(fake_list)
@@ -102,9 +104,9 @@ class KDC(Socket):
 
         if login == sm3.hash(self.format_last.encode()):
             loc_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            self.Kdb.insert_data(self.UserA.decode(), loc_time, "kdc_login")
+            self.Kdb.insert_data(self.UserA.decode(), loc_time, 'kdc_login')
         else:
-            print(R + "[-] KDC_ERR_LOGIN_INVALID" + w)
+            print(R + '[-] KDC_ERR_LOGIN_INVALID' + w)
             os._exit(0)
 
     def kkdc_encrypt(self):
@@ -172,7 +174,7 @@ class KDC(Socket):
         tsp_compare(timestamp)
         user_compare(UserA_1, UserA_2)
 
-        self.B_pwd = self.Kdb.query_data(ResourceB.decode(), "kdc_tb")[0].encode()
+        self.B_pwd = self.Kdb.query_data(ResourceB.decode(), 'kdc_user')[0].encode()
 
     def set_Ticket(self, kclt_srv):
         """ Ticket = { UserA, Kclt-srv } Ksrv """
@@ -228,5 +230,4 @@ class KDC(Socket):
 
 
 if __name__ == '__main__':
-    k = KDC()
-    k.main()
+    KDC(MAIN_PWD).main()

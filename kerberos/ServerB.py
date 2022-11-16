@@ -1,15 +1,15 @@
-from SM_algorithm.gmssl import sm2, sm3, sm4
-from func import *
-
-from KerberosSocket import Socket
+from conf.config import SIGN
+from lib.common import tsp_compare, nonce_compare, user_compare, set_timestamp, get_random_str
+from lib.gmssl import sm2, sm3, sm4
+from lib.ksocket import Socket
 
 
 class ServerB(Socket):
     def __init__(self, pwd):
         super().__init__()
 
-        self.bind_ip = "0.0.0.0"
-        self.bind_port = 8001
+        self.bind_ip = '0.0.0.0'
+        self.bind_port = 9001
 
         self.B_pwd = sm3.hash(pwd.encode())[:20]
 
@@ -72,8 +72,7 @@ class ServerB(Socket):
         self.resolve_CS_REQ(cs_req)
 
         self.crypt_sm4_kclt_srv.set_key(self.Kclt_srv, sm4.SM4_ENCRYPT)
-        CS_REP = self.crypt_sm4_kclt_srv.crypt_ecb(timestamp + SIGN + nonce) + \
-                 SIGN + self.pub_key_b.encode()
+        CS_REP = self.crypt_sm4_kclt_srv.crypt_ecb(timestamp + SIGN + nonce) + SIGN + self.pub_key_b.encode()
 
         print('[+] Set CS_REP: ', CS_REP)
 
@@ -93,9 +92,5 @@ class ServerB(Socket):
 
 
 if __name__ == '__main__':
-    # b = ServerB("这是B的密码222")
+    ServerB('这是B的密码222').main()
 
-    pw = input("password: ")
-
-    b = ServerB(pw)
-    b.main()

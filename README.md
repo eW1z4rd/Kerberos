@@ -1,11 +1,11 @@
-# Kerberos
-基于SM国密算法改进的Kerberos身份认证系统
+## Kerberos
+基于 SM 国密算法改进的 Kerberos 身份认证系统。
 
-系统依赖SM算法：[duanhongyi](https://github.com/duanhongyi)/[**gmssl**](https://github.com/duanhongyi/gmssl)
+系统依赖SM算法：[duanhongyi/gmssl](https://github.com/duanhongyi/gmssl)
 
-**系统架构图：**
+### 系统架构图
 
-![pic](https://github.com/eW1z4rd/Kerberos/blob/master/pic/pic.png)
+![master](docs/master.png)
 
 **其中：**
 
@@ -29,11 +29,26 @@
 
 8. CS_REP = { timestamp, nonce } Kclt-srv, pub_key_b
 
-**可执行文件运行顺序：**
-- 身份认证
-1. KDC.py
-2. ServerB.py
-3. ClientA.py
-- 用户注册
-1. RegServer.py
-2. RegClient.py
+### 快速开始
+
+1. 创建数据库：
+
+   ```mysql
+   CREATE DATABASE IF NOT EXISTS kerberos DEFAULT CHARACTER SET utf8;
+   ```
+
+2. 在 `conf/config.py` 下完成 MySQL 配置；
+
+3. 运行 `console/migrate.py` 构建数据表；
+
+4. 运行 `kerberos/register/RegServer.py` 和 `kerberos/register/RegClient.py` 完成认证双方的注册；
+
+5. 依次启动 `kerberos/KDC.py`、`kerberos/ServerB.py`、`kerberos/ClientA.py` 模拟完整的身份认证过程。
+
+### 端口服务
+
+系统共包含 3 个服务：
+
+- KDC 默认占用 9000 端口
+- ServerB 默认占用 9001 端口
+- RegServer 默认占用 9002 端口
